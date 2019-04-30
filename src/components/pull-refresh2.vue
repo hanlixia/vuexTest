@@ -13,6 +13,11 @@
         </slot>
       </header>
       <slot></slot>
+      <footer class="load-more">
+        <slot name="load-more">
+          <span :class="{'show':ispullup}">加载中……</span>
+        </slot>
+      </footer>
     </section>
   </div>
 </template>
@@ -36,6 +41,11 @@ export default {
       type: Function,
       default: undefined,
       required: false
+    },
+    onInfinite: {
+      type: Function,
+      default: undefined,
+      require: false
     }
   },
   data() {
@@ -43,7 +53,9 @@ export default {
       top: 0,
       state: 0,
       startY: 0,
-      touching: false
+      touching: false,
+      infiniteLoading: false,
+      ispullup:false
     }
   },
   methods: {
@@ -58,7 +70,7 @@ export default {
       }
       let diff = e.targetTouches[0].pageY - this.startY - this.startScroll
       if (diff > 0) e.preventDefault()
-      this.top = Math.pow(diff, 0.8) + (this.state === 2 ? this.offset : 0);
+      this.top = Math.pow(diff, 0.8) + (this.state === 2 ? this.offset : 0)
 
       if (this.state === 2) { // in refreshing
         return
@@ -68,11 +80,24 @@ export default {
       } else {
         this.state = 0
       }
+
+      //上拉刷新
+      if (!this.enableInfinite || this.infiniteLoading) {
+        return
+      }
+      let outerHeight = this.$el.clientHeight
+      let innerHeight = this.$el.querySelector('.inner').clientHeight
+      let scrollTop = this.$el.scrollTop
+      let ptrHeight = this.onRefresh ? this.$el.querySelector('.pull-refresh').clientHeight : 0
+      let infiniteHeight = this.$el.querySelector('.load-more').clientHeight
+      let bottom = innerHeight - outerHeight - scrollTop - ptrHeight
+      if (bottom < infiniteHeight){this.ispullup=true;setTimeout((function(){this.infinite()}).bind(this),1000)}
     },
     touchEnd(e) {
       if (!this.enableRefresh) return
       this.touching = false
       if (this.state === 2) { // in refreshing
+        this.state = 2
         this.top = this.offset
         return
       }
@@ -91,6 +116,16 @@ export default {
     refreshDone() {
       this.state = 0
       this.top = 0
+    },
+
+    infinite() {
+      this.infiniteLoading = true
+      this.onInfinite(this.infiniteDone)
+    },
+
+    infiniteDone() {
+      this.infiniteLoading = false;
+      this.ispullup=false;
     }
   }
 }
@@ -98,7 +133,7 @@ export default {
 <style>
 .yo-scroll {
   position: absolute;
-  top: 0rem;
+  top: 2.5rem;
   right: 0;
   bottom: 0;
   left: 0;
@@ -144,5 +179,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-}  
+} 
+.load-more span{display:none;}
+.load-more .show{display:block;}
 </style>

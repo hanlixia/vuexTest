@@ -1,10 +1,30 @@
 <template>
   <div>
-    <h1 class="head"><a href="javascript:history.back()" class="back">&lt;返回</a>详情页</h1>
-    <!-- <p class="nav"><i>浏览量：</i><em>{{$store.state.viewCount}}</em></p> -->
-    <div class="cont" v-for="detail in result" v-if="detail.id==$route.params.id">
-          <h2>{{detail.name}}</h2>
-          <div>{{detail.content}}</div>
+    <h1 class="head"><a href="javascript:history.back()" class="back"></a>详情页</h1>
+    <p class="nav"><i>浏览量：</i><em>{{$store.state.viewCount}}</em></p>
+    <div class="cont" v-for="detail in result" v-if="detail.key==$route.params.id">
+          <div class="drug-b drug-spe">
+              <h4 class="drug-t">{{detail.subdisplay.name}}</h4>
+              <div class="drug-info">
+
+                  <div class="d-img" v-if="detail.subdisplay.image">
+                      <img :src="detail.subdisplay.image" alt="#"></div>
+                  <div class="d-con">
+                      <p v-if="detail.subdisplay.approvedname">通用名：{{detail.subdisplay.approvedname}}</p>
+                      <p v-if="detail.subdisplay.engname">英文名：{{detail.subdisplay.engname}}</p>
+                      <p v-if="detail.subdisplay.manufacturer">生产企业：{{detail.subdisplay.manufacturer}}</p>
+
+                      <p v-if="detail.subdisplay.price">参考价格：{{detail.subdisplay.price}}</p>
+                  </div>
+              </div>
+          </div>
+          <div class="dspe-txt" >
+              <div v-for="item in detail.subdisplay.tab_list.tab">
+                <h4>【{{item.tab_name}}】</h4>
+                <p  v-html="item.tab_content"></p>
+              </div >
+            
+          </div>
       </div>
   </div>
 </template>
@@ -15,41 +35,42 @@ export default {
   name: 'detail',
   data(){
     return {
-      url: 'mock/news.json',
-      result: null
+      url: 'mock/drugs.json',
+      //result: null
     }
   },
   mounted(){
     this.getDetail({id:this.$route.params.id});
   },
   computed: {
-    // result(){
-    //   return this.$store.state.detailData.list
-    // }
+    result(){
+      return this.$store.state.detailData.list
+    }
   },
   methods:{
-    //...mapActions(['getDetail'])// 映射 this.getDetail() 为 this.$store.dispatch('getDetail')
+    ...mapActions(['getDetail'])// 映射 this.getDetail() 为 this.$store.dispatch('getDetail')
 
-    getDetail() {
-      this.$http.get(this.url).then((response) => {
-          //成功回调
-          try {
+    // getDetail() {
+    //   this.$http.get(this.url).then((response) => {
+    //       //成功回调
+    //       try {
 
-            this.result = Object.assign({}, response.data);
-            console.log(1233)
-          } catch (err) {
+    //         this.result = Object.assign({}, response.data.list);
+    //         console.log(1233)
+    //       } catch (err) {
 
-          }
-      }, (response) => {
-      })
-    }
+    //       }
+    //   }, (response) => {
+    //   })
+    // }
   }
 }
 </script>
 
 <style scoped>
-h1, h2 {font-weight: normal;margin:0;}
-a{text-decoration: none;}
+  h1, h2 {
+  font-weight: normal;
+}
 
 ul {
   list-style-type: none;

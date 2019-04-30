@@ -1,4 +1,4 @@
-# myuvex
+# vuex_demo
 
 > A Vue.js project
 
